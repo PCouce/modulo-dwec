@@ -233,32 +233,34 @@
             </tr>
         </table>
         <script>
-            // Variable global
+            // Variables globales
             let resultadoActual = "0";
-            let operando = "0";
-            let operacionSeleccionada = "0";
+            let operando = null;
+            let operacionSeleccionada = null;
+            let limpiarPantalla = false; // Flag para saber cuándo limpiar la pantalla al escribir el 2º operando
 
             console.log("Este es mi primer JavaScript");
 
             function darNumero(numero) {
-                console.log("El número es: ", numero);
-
                 let strNumero = String(numero);
 
-                if (resultadoActual === "0") {
+                // Si venimos de pulsar un operador, limpiamos la pantalla para el nuevo número
+                if (resultadoActual === "0" || limpiarPantalla) {
                     resultadoActual = strNumero;
+                    limpiarPantalla = false;
                 } else {
                     resultadoActual += strNumero;
                 }
-
-                console.log("La salida es: ", resultadoActual);
 
                 refrescar();
             }
 
             function darComa() {
-                if (!resultadoActual.includes(".")) {
-                    resultadoActual += ".";
+                if (limpiarPantalla) {
+                    resultadoActual = "0,";
+                    limpiarPantalla = false;
+                } else if (!resultadoActual.includes(",")) {
+                    resultadoActual += ",";
                 }
 
                 refrescar();
@@ -266,9 +268,9 @@
 
             function darC() {
                 resultadoActual = "0";
-                reiniciarPantalla = false;
                 operando = null;
                 operacionSeleccionada = null;
+                limpiarPantalla = false;
 
                 refrescar();
             }
@@ -277,42 +279,52 @@
                 console.log("La operación es : ", valor);
                 operando = resultadoActual;
                 operacionSeleccionada = valor;
-                reiniciarPantalla = true;
+                limpiarPantalla = true; // El próximo número que se ingrese limpiará el display
             }
 
             function esIgual() {
                 if (operando === null || operacionSeleccionada === null) return;
+
                 console.log("Valor operando1: ", operando);
                 console.log("Operación seleccionada:", operacionSeleccionada);
 
-                operando = parseFloat(operando);
-                let operando2 = parseFloat(resultadoActual);
-                console.log("Valor operando2 : ", operando2);
+                let num1 = parseFloat(operando.replace(",", "."));
+                let num2 = parseFloat(resultadoActual.replace(",", "."));
+                console.log("Valor operando2 : ", num2);
+
                 let resultado = 0;
 
                 switch (operacionSeleccionada) {
                     case 1: // suma
-                        resultado = operando + operando2;
+                        resultado = num1 + num2;
                         break;
                     case 2: // resta
-                        resultado = operando - operando2;
+                        resultado = num1 - num2;
                         break;
-                    case 3: // mltiplicación
-                        resultado = operando * operando2;
+                    case 3: // multiplicación
+                        resultado = num1 * num2;
                         break;
                     case 4: // división
-                        resultado = operando / operando2;
+                        if (num2 === 0) {
+                            resultadoActual = "Error";
+                            refrescar();
+                            return;
+                        }
+                        resultado = num1 / num2;
                         break;
                     case 5: // potencia
-                        resultado = Math.pow(operando, operando2);
+                        resultado = Math.pow(num1, num2);
                         break;
-
-                        darC();
                 }
 
-                resultado = parseFloat(operando) + parseFloat(operando2);
-                resultadoActual = String(resultado);
-                reiniciarPantalla = true;
+                // Formatear el resultado devolviendo coma decimal
+                resultadoActual = String(resultado).replace(".", ",");
+
+                // Resetear operaciones para el siguiente cálculo
+                operando = null;
+                operacionSeleccionada = null;
+                limpiarPantalla = true;
+
                 refrescar();
             }
 
